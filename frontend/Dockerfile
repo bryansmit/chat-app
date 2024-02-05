@@ -13,6 +13,8 @@ ENV NODE_ENV production
 
 WORKDIR /var/www/html/app
 
+RUN npm i -g vite
+
 # Download dependencies as a separate step to take advantage of Docker's caching.
 # Leverage a cache mount to /root/.npm to speed up subsequent builds.
 # Leverage a bind mounts to package.json and package-lock.json to avoid having to copy them into this layer.
