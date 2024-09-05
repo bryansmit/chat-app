@@ -9,3 +9,9 @@ Om de applicatie op te starten voer het volgende commando uit vanuit de root fol
 
 - De client draait op: http://localhost:3000
 - De server draait op: http://localhost:3001 (Hier is niks zichtbaar)
+
+
+## Extra componenten
+- Database opzetten
+- Tabel bijhouden met gebruikers
+- Tabel bijhouden met berichten van gebruikers
