@@ -15,15 +15,15 @@ const pool = mysql.createPool({
   database: 'chat_app'
 })
 
-// pool.query('SELECT * FROM messages', (err, results, fields) => {
-//   wss.clients.forEach(function (client) {
-//     if (err) throw err;
-//
-//     client.send(results);
-//   })
-// })
-
 wss.on('connection', function (ws) {
+  pool.query('SELECT * FROM messages', (err, results, fields) => {
+      if (err) throw err;
+      ws.send(JSON.stringify({
+        type: 'messages',
+        data: results
+      }));
+  })
+
   ws.on('message', function (data) {
     wss.clients.forEach(function (client) {
       if (client !== ws && client.readyState === WebSocket.OPEN) {

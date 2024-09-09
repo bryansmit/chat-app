@@ -14,7 +14,7 @@
       <div v-for="(message, index) in messages"
            :key="index"
            class="bg-gray-100 p-4 flex flex-col gap-1">
-        <span class="text-gray-800 font-bold">{{ message.from }}</span>
+        <span class="text-gray-800 font-bold">{{ message.sender_name }}</span>
         {{ message.message }}
       </div>
     </div>
@@ -40,10 +40,10 @@ export default {
       }
 
       const messageObj = {
-        from: this.username,
-        type: "message",
+        type: "chat_message",
+        sender_name: this.username,
         message: message,
-        date: Date.now(),
+        sent_at: Date.now(),
       };
 
       this.connection.send(JSON.stringify(messageObj));
@@ -58,18 +58,25 @@ export default {
     this.connection = new WebSocket('ws://localhost:3001')
     this.connection.binaryType = 'blob';
 
-    this.connection.onopen = () => {
-      this.connection.send(JSON.stringify({
-        from: this.username,
-        type: "join",
-      }));
-    }
-
     this.connection.onmessage = ({data}) => {
-      data.text().then((message) => {
-        const newMessage = JSON.parse(message);
+      if (!(data instanceof Blob)) {
+        const message = JSON.parse(data);
 
-        this.onNewMessage(newMessage);
+        if (message.type === 'messages') {
+          this.messages = message.data;
+        }
+
+        return;
+      }
+
+      data.text().then((message) => {
+        const newMessages = JSON.parse(message);
+
+        if (Array.isArray(newMessages)) {
+          this.messages = newMessages;
+        } else {
+          this.onNewMessage(newMessages);
+        }
       })
     };
   }
