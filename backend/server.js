@@ -25,11 +25,19 @@ wss.on('connection', function (ws) {
   })
 
   ws.on('message', function (data) {
-    wss.clients.forEach(function (client) {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(data);
-      }
-    })
+    const message = JSON.parse(data);
+
+    if (message.type === 'chat_message') {
+      pool.query('INSERT INTO messages (sender_name, message, sent_at) VALUES (?, ?, ?)', [message.sender_name, message.message, message.sent_at], (err, results, fields) => {
+        if (err) throw err;
+      })
+
+      wss.clients.forEach((client) => {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(message));
+        }
+      })
+    }
   })
 })
 

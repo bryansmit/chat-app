@@ -23,6 +23,8 @@
 </template>
 
 <script>
+import moment from 'moment';
+
 export default {
   name: 'App',
   data: function () {
@@ -43,7 +45,7 @@ export default {
         type: "chat_message",
         sender_name: this.username,
         message: message,
-        sent_at: Date.now(),
+        sent_at: moment().format('YYYY-MM-DD HH:mm:ss')
       };
 
       this.connection.send(JSON.stringify(messageObj));
@@ -56,28 +58,18 @@ export default {
   },
   created: function () {
     this.connection = new WebSocket('ws://localhost:3001')
-    this.connection.binaryType = 'blob';
 
     this.connection.onmessage = ({data}) => {
-      if (!(data instanceof Blob)) {
-        const message = JSON.parse(data);
+      const message = JSON.parse(data);
 
-        if (message.type === 'messages') {
+      switch (message.type) {
+        case 'chat_message':
+          this.onNewMessage(message);
+          break;
+        case 'messages':
           this.messages = message.data;
-        }
-
-        return;
+          break;
       }
-
-      data.text().then((message) => {
-        const newMessages = JSON.parse(message);
-
-        if (Array.isArray(newMessages)) {
-          this.messages = newMessages;
-        } else {
-          this.onNewMessage(newMessages);
-        }
-      })
     };
   }
 }
